@@ -40,13 +40,33 @@ exports.dosage = function(req, res) {
         })
 }
 
+// GET: render mặc định với 30 ngày
 exports.purchase = function(req, res) {
-    // Make a get request to /api/users
-    axios.get(`${BASE_URI}:${PORT}/api/drugs`) //get request to pull drugs
+    axios.get(`${BASE_URI}:${PORT}/api/drugs`)
         .then(function(response) {
-            res.render('purchase', { drugs: response.data, title: 'Purchase Drugs' }); // response from API request stored as drugs to display on manage.ejs
+            res.render('purchase', { 
+                drugs: response.data, 
+                title: 'Purchase Drugs',
+                days: 30
+            });
         })
         .catch(err => {
-            res.send(err);
+            res.render('error', { error: err });
+        });
+};
+
+// POST: nhận số ngày từ form
+exports.purchasePost = function(req, res) {
+    const days = parseInt(req.body.days) || 30;
+    axios.get(`${BASE_URI}:${PORT}/api/drugs`)
+        .then(function(response) {
+            res.render('purchase', { 
+                drugs: response.data, 
+                title: 'Purchase Drugs',
+                days
+            });
         })
-}
+        .catch(err => {
+            res.render('error', { error: err });
+        });
+};

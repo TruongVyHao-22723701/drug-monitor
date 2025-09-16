@@ -1,83 +1,74 @@
-<script>
-    document.querySelectorAll('.delete').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const id = this.dataset.id;
-
-            if (confirm("Are you sure you want to delete this drug?")) {
-                fetch(`/api/drugs/${id}`, { // đường dẫn trùng route DELETE
-                        method: 'DELETE'
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        alert(data.message); // thông báo tên thuốc vừa xóa
-                        location.reload(); // reload lại trang để cập nhật bảng
-                    })
-                    .catch(err => alert("Error: " + err));
-            }
-        });
-    });
-</script>
 <!-- add header -->
 <%- include('includes/_header') %>
-    <!-- end header -->
-    <!-- Main section -->
-    <main id="main">
-        <a href="/add-drug">
-            <button id="new">New Drug <i class="fas fa-pills"></i></button>
-        </a>
+<!-- end header -->
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Drug Name</th>
-                    <th>Tablets per Card</th>
-                    <th>Tablets per Pack</th>
-                    <th>Taken per Day</th>
-                    <th>Daily dosage</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Loop through drugs -->
-                <% for(let i = 0; i < drugs.length; i++) {%>
-                    <tr>
-                        <td>
-                            <%= i + 1 %>
-                        </td>
-                        <td>
-                            <%= drugs[i].name %>
-                        </td>
-                        <td>
-                            <%= drugs[i].card %>
-                        </td>
-                        <td>
-                            <%= drugs[i].pack %>
-                        </td>
-                        <td>
-                            <%= drugs[i].perDay %>
-                        </td>
-                        <td>
-                            <%= drugs[i].dosage %>
-                        </td>
-                        <td>
-                            <a href="/update-drug?id=<%= drugs[i]._id%>">
-                                <span class='fa fa-edit'></span>
-                            </a>
-                            <a class="delete" data-id="<%= drugs[i]._id %>">
-                                <span class='fa fa-trash'></span>
-                            </a>
+<!-- Main section -->
+<main id="main">
+    <a href="/add-drug">
+        <button id="new">New Drug <i class="fas fa-pills"></i></button>
+    </a>
 
-                            </a>
-                        </td>
-                    </tr>
-                    <% } %>
-                        <!--  End loop -->
-            </tbody>
-        </table>
-    </main>
-    <!-- End main section -->
-    <!-- add footer -->
-    <%- include('includes/_footer') %>
-        <!-- end footer
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Drug Name</th>
+                <th>Tablets per Card</th>
+                <th>Tablets per Pack</th>
+                <th>Taken per Day</th>
+                <th>Daily dosage</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(let i = 0; i < drugs.length; i++) { %>
+            <tr id="drug-<%= drugs[i]._id %>">
+                <td><%= i + 1 %></td>
+                <td><%= drugs[i].name %></td>
+                <td><%= drugs[i].card %></td>
+                <td><%= drugs[i].pack %></td>
+                <td><%= drugs[i].perDay %></td>
+                <td><%= drugs[i].dosage %></td>
+                <td>
+                    <!-- Update link -->
+                    <a href="/update-drug?id=<%= drugs[i]._id %>">
+                        <span class='fa fa-edit'></span>
+                    </a>
+
+                    <!-- Delete button -->
+                    <button class="delete" data-id="<%= drugs[i]._id %>">
+                        <span class='fa fa-trash'></span>
+                    </button>
+                </td>
+            </tr>
+            <% } %>
+        </tbody>
+    </table>
+</main>
+<!-- End main section -->
+
+<!-- add footer -->
+<%- include('includes/_footer') %>
+<!-- end footer -->
+
+<!-- JavaScript delete -->
+<script>
+document.querySelectorAll('.delete').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        const id = this.dataset.id;
+        if(confirm("Are you sure you want to delete this drug?")) {
+            fetch(`/api/drugs/${id}`, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                // remove the deleted row from table
+                const row = document.getElementById(`drug-${id}`);
+                if(row) row.remove();
+            })
+            .catch(err => alert("Error: " + err));
+        }
+    });
+});
+</script>

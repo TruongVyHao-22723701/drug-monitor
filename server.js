@@ -1,10 +1,16 @@
-const express = require('express'); //we installed express using npm previously and we are indicating that it would be used here
-const app = express(); //this assigns express to the variable "app" - anything else can be used.
-const bodyParser = require('body-parser'); //body-parser makes it easier to deal with request content by making it easier to use
-const dotenv = require('dotenv').config(); //indicates we would be using .env
-const morgan = require('morgan'); //this logs requests so you can easily troubleshoot
-const connectMongo = require('./server/database/connect'); //requires connect.js file
-const PORT = process.env.PORT || 3100; //uses either what's in our env or 3100 as our port (you can use any unused port)
+require('dotenv').config(); // ⚡ load .env ngay đầu tiên
+
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+const connectMongo = require('./server/database/connect');
+const { notFoundHandler, errorHandler } = require('./server/middleware/errorHandler');
+
+const PORT = process.env.PORT || 3000;
+
+// Test xem biến env có load chưa
+console.log("Loaded MONGO_STR:", process.env.MONGO_STR);
 
 // Middleware parse JSON
 app.use(express.json());
@@ -12,22 +18,36 @@ app.use(express.json());
 // Middleware parse URL-encoded (form submissions)
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.set('view engine', 'ejs'); //Put before app.use, etc. Lets us use EJS for views
-//use body-parser to parse requests
-app.use(bodyParser.urlencoded({ extended: true }));
-//indicates which is the folder where static files are served from
+// set view engine
+app.set('view engine', 'ejs');
+
+// serve static files
 app.use(express.static('assets'));
-//use morgan to log http requests
+
+// log http requests
 app.use(morgan('tiny'));
 
-//connect to Database
+// connect to Database
 connectMongo();
 
-//load the routes
-app.use('/', require('./server/routes/routes')); //Pulls the routes file whenever this is loaded
+// load routes
+app.use('/', require('./server/routes/routes'));
 
+// ⚡ Error Handlers (đặt cuối cùng)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
-app.listen(PORT, function() { //specifies port to listen on
-    console.log('listening on ' + PORT);
-    console.log(`Welcome to the Drug Monitor App at http://localhost:${PORT}`);
-})
+// global crash handlers
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1); // nếu muốn app restart bởi PM2/Nodemon
+});
+
+app.listen(PORT, function() {
+  console.log('listening on ' + PORT);
+  console.log(`Welcome to the Drug Monitor App at http://localhost:${PORT}`);
+});

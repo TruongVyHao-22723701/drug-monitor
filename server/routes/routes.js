@@ -17,7 +17,7 @@ route.get('/', services.home);
 route.get('/manage', services.manage);
 route.get('/dosage', services.dosage);
 route.get('/purchase', services.purchase);
-route.post('/purchase', services.purchase);
+route.post('/purchase', services.purchasePost);
 route.get('/add-drug', services.addDrug);
 route.get('/update-drug', services.updateDrug);
 
